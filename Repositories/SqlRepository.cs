@@ -7,12 +7,19 @@ public class SqlRepository<T> : IRepository<T> where T : class, IEntity, new()
 {
     private readonly DbSet<T> _dbSet;
     private readonly DbContext _dbContext;
+    private readonly Action<T>? _itemAdded;
+    private readonly Action<T>? _itemRemoved;
 
-    public SqlRepository(DbContext dbContext)
+    public SqlRepository(DbContext dbContext, Action<T>? ItemAdded = null, Action<T>? ItemRemoved = null)
     {
         _dbContext= dbContext;
         _dbSet= _dbContext.Set<T>();
+        _itemAdded= ItemAdded;
+        _itemRemoved=ItemRemoved;
     }
+
+    public event EventHandler<T>? ItemAdded;
+    public event EventHandler<T>? ItemRemoved;
 
     public IEnumerable<T> GetAll()
     {
@@ -27,11 +34,13 @@ public class SqlRepository<T> : IRepository<T> where T : class, IEntity, new()
     public void Add(T item)
     {
         _dbSet.Add(item);
+        ItemAdded?.Invoke(this, item);
     }
 
     public void Remove(T item)
     {
         _dbSet.Remove(item);
+        ItemRemoved?.Invoke(this, item);    
     }
     public void Save()
     {

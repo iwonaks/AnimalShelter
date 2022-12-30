@@ -25,11 +25,13 @@ namespace AnimalShelter.Repositories
 
         public void Remove(T item)
         {
+            item.Id = _items.Count- 1;
             _items.Remove(item);
         }
 
         public void Save()
         {
+            
         }
     }
 }
