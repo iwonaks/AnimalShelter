@@ -25,20 +25,27 @@ static void DogRepositoryOnItemRemoved(object? sender, Dog d)
 static void DogRepositoryMale(IRepository<Dog> dogRepository)
 {
     var items = dogRepository.GetAll();
+
     foreach (var item in items)
     {
         if (item.Gender=="M")
+        {
             Console.WriteLine($"Dog Male => {item.Id}, {item.Name}");
+        }
     }
 }
 
 static void DogRepositoryFemale(IRepository<Dog> dogRepository)
 {
     var items = dogRepository.GetAll();
+    
     foreach (var item in items)
     {
         if (item.Gender=="F")
+
+        {
             Console.WriteLine($"Dog Female => {item.Id}, {item.Name}");
+        }
     }
 }
 
@@ -122,6 +129,7 @@ static void AddMedicaments(IRepository<Medicament> medicamentRepository)
 static void WriteAllToConsole(IReadRepository<IEntity> repository)
 {
     var items = repository.GetAll();
+    
     foreach (var item in items)
     {
         Console.WriteLine(item);
@@ -134,6 +142,7 @@ static void AddNewDog(IRepository<Dog> dogRepository)
     {
         Console.WriteLine("Dog name:");
         var dogname = Console.ReadLine().ToUpper();
+        
         while (String.IsNullOrEmpty(dogname))
         {
             Console.WriteLine("This input can not be empty.");
@@ -142,6 +151,7 @@ static void AddNewDog(IRepository<Dog> dogRepository)
 
         Console.WriteLine("Dog gender: F or M");
         var doggender = Console.ReadLine().ToUpper();
+        
         if (doggender!="M" && doggender!="F")
         {
             Console.WriteLine("Incorect choise.");
@@ -162,6 +172,7 @@ static T? FindEntityById<T>(IRepository<T> repository) where T : class, IEntity
         var idInput = Console.ReadLine();
         int idValue = 0;
         var idEntityYouWant = int.TryParse(idInput, out idValue);
+        
         if (!idEntityYouWant)
         {
             Console.WriteLine("Podaj wartość liczbową");
@@ -169,6 +180,7 @@ static T? FindEntityById<T>(IRepository<T> repository) where T : class, IEntity
         else
         {
             var result = repository.GetById(idValue);
+            
             if (result == null)
             {
                 Console.WriteLine($"There is no element in the {idValue} position in {typeof(T).Name}. ");
