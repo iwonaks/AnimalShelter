@@ -79,7 +79,7 @@ static void EmloyeeSaveToFileChanges(object? sender, Employee e)
     }
 }
 
-AddEmployees(employeeRepository);
+//AddEmployees(employeeRepository);
 
 static void AddEmployees(IRepository<Employee> employeeRepository)
 {
@@ -213,13 +213,13 @@ static void AddNewEmployee(IRepository<Employee> employeeRepository)
         var newEmployee = new Employee { Name = employeename, SurName = employeesurname, Education = employeeeducation };
         employeeRepository.Add(newEmployee);
 
-        Persist persist = new Persist();
-        persist.Load();
-        persist.SaveToJson(newEmployee);
+        Persist jsonrepo = new Persist();
         
+        jsonrepo.SaveToJson(newEmployee);
+        jsonrepo.Load();
 
-        var loadedItem = persist.Load();
-        Console.WriteLine(loadedItem);
+        //var loadedItem = jsonrepo.Load();
+        //Console.WriteLine(loadedItem);
         break;
     }
     employeeRepository.Save();
