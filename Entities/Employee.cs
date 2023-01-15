@@ -1,4 +1,6 @@
-﻿namespace AnimalShelter.Entities
+﻿using AnimalShelter.Repositories;
+namespace AnimalShelter.Entities
+
 {
     public class Employee : EntityBase
     {

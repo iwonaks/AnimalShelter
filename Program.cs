@@ -4,12 +4,15 @@ using AnimalShelter.Data;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using AnimalShelter.Repositories.Extensions;
 using System.Runtime.CompilerServices;
+using System.IO;
+using System.Text.Json;
 
 var dogRepository = new SqlRepository<Dog>(new AnimalShelterDbContext());
 var employeeRepository = new SqlRepository<Employee>(new AnimalShelterDbContext());
 {
     dogRepository.ItemAdded += DogRepositoryOnItemAdded;
     employeeRepository.ItemAdded += EmplyeeRepositoryOnItemAdded;
+    employeeRepository.ItemAdded += EmloyeeSaveToFileChanges;
 }
 
 static void DogRepositoryOnItemAdded(object? sender, Dog d)
@@ -38,11 +41,10 @@ static void DogRepositoryMale(IRepository<Dog> dogRepository)
 static void DogRepositoryFemale(IRepository<Dog> dogRepository)
 {
     var items = dogRepository.GetAll();
-    
+
     foreach (var item in items)
     {
         if (item.Gender=="F")
-
         {
             Console.WriteLine($"Dog Female => {item.Id}, {item.Name}");
         }
@@ -65,6 +67,16 @@ static void AddDogs(IRepository<Dog> dogRepository)
 static void EmplyeeRepositoryOnItemAdded(object? sender, Employee e)
 {
     Console.WriteLine($"Employee added => {e.Name} from {sender?.GetType().Name}");
+}
+
+static void EmloyeeSaveToFileChanges(object? sender, Employee e)
+{
+    DateTime saveUtcNow = DateTime.UtcNow;
+
+    using (var writer = File.AppendText("changesDataEmployeeReport.txt"))
+    {
+        writer.WriteLine($"Add new employee [{saveUtcNow}], Name: {e.Name}, Surname:{e.SurName}, Education: {e.Education}");
+    }
 }
 
 AddEmployees(employeeRepository);
@@ -129,7 +141,7 @@ static void AddMedicaments(IRepository<Medicament> medicamentRepository)
 static void WriteAllToConsole(IReadRepository<IEntity> repository)
 {
     var items = repository.GetAll();
-    
+
     foreach (var item in items)
     {
         Console.WriteLine(item);
@@ -142,7 +154,7 @@ static void AddNewDog(IRepository<Dog> dogRepository)
     {
         Console.WriteLine("Dog name:");
         var dogname = Console.ReadLine().ToUpper();
-        
+
         while (String.IsNullOrEmpty(dogname))
         {
             Console.WriteLine("This input can not be empty.");
@@ -151,7 +163,7 @@ static void AddNewDog(IRepository<Dog> dogRepository)
 
         Console.WriteLine("Dog gender: F or M");
         var doggender = Console.ReadLine().ToUpper();
-        
+
         if (doggender!="M" && doggender!="F")
         {
             Console.WriteLine("Incorect choise.");
@@ -159,9 +171,58 @@ static void AddNewDog(IRepository<Dog> dogRepository)
         }
         var newDog = new Dog { Name = dogname, Gender = doggender };
         dogRepository.Add(newDog);
+
         break;
     }
     dogRepository.Save();
+}
+
+
+static void AddNewEmployee(IRepository<Employee> employeeRepository)
+{
+    while (true)
+    {
+        Console.WriteLine("Employee name:");
+        var employeename = Console.ReadLine().ToUpper();
+
+        while (String.IsNullOrEmpty(employeename))
+        {
+            Console.WriteLine("This input can not be empty.");
+            employeename = Console.ReadLine().ToUpper();
+        }
+
+        Console.WriteLine("Employee surneme:");
+        var employeesurname = Console.ReadLine().ToUpper();
+
+        while (String.IsNullOrEmpty(employeesurname))
+        {
+            Console.WriteLine("This input can not be empty.");
+            employeesurname = Console.ReadLine().ToUpper();
+        }
+
+        Console.WriteLine("Employee education:");
+        var employeeeducation = Console.ReadLine().ToUpper();
+
+        while (String.IsNullOrEmpty(employeeeducation))
+        {
+            Console.WriteLine("This input can not be empty.");
+            employeeeducation = Console.ReadLine().ToUpper();
+        }
+        
+
+        var newEmployee = new Employee { Name = employeename, SurName = employeesurname, Education = employeeeducation };
+        employeeRepository.Add(newEmployee);
+
+        Persist persist = new Persist();
+        persist.Load();
+        persist.SaveToJson(newEmployee);
+        
+
+        var loadedItem = persist.Load();
+        Console.WriteLine(loadedItem);
+        break;
+    }
+    employeeRepository.Save();
 }
 
 static T? FindEntityById<T>(IRepository<T> repository) where T : class, IEntity
@@ -172,15 +233,15 @@ static T? FindEntityById<T>(IRepository<T> repository) where T : class, IEntity
         var idInput = Console.ReadLine();
         int idValue = 0;
         var idEntityYouWant = int.TryParse(idInput, out idValue);
-        
+
         if (!idEntityYouWant)
         {
-            Console.WriteLine("Podaj wartość liczbową");
+            Console.WriteLine("Give me natural number");
         }
         else
         {
             var result = repository.GetById(idValue);
-            
+
             if (result == null)
             {
                 Console.WriteLine($"There is no element in the {idValue} position in {typeof(T).Name}. ");
@@ -246,14 +307,30 @@ while (true)
             break;
 
         case "3":
-            Console.WriteLine("A - add \nR - remove \n" +
+            Console.WriteLine("A - add \n" +
+                "R - remove \n" +
                 "Any Other key - leave and go to MENU");
 
             var changeData = Console.ReadLine().ToUpper();
 
             if (changeData == "A")
             {
-                AddNewDog(dogRepository);
+                Console.WriteLine("D - add dog\n" +
+                "E - add employee\n" +
+                "Any Other key - leave and go to MENU");
+
+                var changeDataEntity = Console.ReadLine().ToUpper();
+
+
+                if (changeDataEntity == "D")
+                {
+                    AddNewDog(dogRepository);
+                }
+
+                if (changeDataEntity == "E")
+                {
+                    AddNewEmployee(employeeRepository);
+                }
             }
             break;
 
@@ -265,14 +342,7 @@ while (true)
             Console.WriteLine("Choose the correct key from the menu");
             break;
     }
+
 }
 
 
-//DateTime saveUtcNow = DateTime.UtcNow;
-
-//using (var writer = File.AppendText("report.txt"))
-//{
-//    writer.WriteLine($"....{saveUtcNow}");
-
-//...................................................................
-//Console.WriteLine("......t.txt");
