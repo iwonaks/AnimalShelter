@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.IO;
 using AnimalShelter.Entities;
 
 namespace AnimalShelter.Repositories
@@ -34,12 +35,7 @@ namespace AnimalShelter.Repositories
         {
             var contents = JsonSerializer.Serialize(item, this.options);
 
-            if (File.Exists(fileName))
-            {
-                File.Delete(fileName);
-            }
-
-            File.WriteAllText(fileName, contents, Encoding.UTF8);
+            File.AppendAllText(fileName, contents, Encoding.UTF8);
         }
     }
 
